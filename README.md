@@ -1,5 +1,9 @@
 # catchpr
 
+[![ci](https://github.com/kfairy9999/catchpr/actions/workflows/ci.yml/badge.svg)](https://github.com/kfairy9999/catchpr/actions/workflows/ci.yml)
+
+**Live replay playground:** https://catchpr.kfairley9999.workers.dev
+
 catchpr comments on a pull request only when it has a generated test that passes on the base commit and fails on the head, every time it is run, and a one-line command that reproduces that result. If it cannot prove a behavior change, it stays silent.
 
 That is the opposite of a review bot that reads the diff and writes remarks. Those tools are regularly criticized for noise. [Greptile's public benchmark](https://www.greptile.com/benchmarks) is a useful picture of that style of evaluation: it scores whether a reviewer names a known bug. It does not score false positives. catchpr is built around the false-positive problem. A comment is a failing test, not a suspicion.
@@ -39,7 +43,13 @@ catchpr repro --repo . --base <base-sha> --head <head-sha> --test-b64 <test>
 
 ## Quickstart
 
-Python 3.10 or newer. The package is not published to PyPI. Install it from a checkout.
+Python 3.10 or newer. The package is not published to PyPI. Install it from GitHub:
+
+```bash
+python -m pip install "git+https://github.com/kfairy9999/catchpr.git"
+```
+
+Or from a local checkout (with dev tools and the benchmark harness):
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -124,7 +134,11 @@ Greptile's July 2025 benchmark, linked above, reports catch rates for review bot
 
 ## Demo
 
-[docs/media/demo.gif](docs/media/demo.gif) is the static replay: diff, generated test, base against head, verdict.
+Live interactive replay: [catchpr.kfairley9999.workers.dev](https://catchpr.kfairley9999.workers.dev).
+
+![catchpr static replay](docs/media/demo.gif)
+
+[docs/media/demo.gif](docs/media/demo.gif) is the recorded replay: diff, generated test, base against head, verdict.
 
 The same page is a single Cloudflare Worker with the HTML embedded and no bindings, so it costs nothing to serve and runs no tests on the server.
 
