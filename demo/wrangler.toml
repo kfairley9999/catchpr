@@ -1,0 +1,7 @@
+name = "catchpr-demo"
+main = "src/worker.js"
+compatibility_date = "2026-11-20"
+workers_dev = true
+
+# No bindings. The page is a static replay and the Worker holds no state.
+# Deploying it does not create KV, R2, D1, or a durable object.

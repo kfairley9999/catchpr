@@ -1,0 +1,11 @@
+{
+  "name": "catchpr-demo",
+  "private": true,
+  "description": "Static replay of catchbench. No bindings.",
+  "scripts": {
+    "dry-run": "wrangler deploy --dry-run"
+  },
+  "devDependencies": {
+    "wrangler": "4.50.0"
+  }
+}

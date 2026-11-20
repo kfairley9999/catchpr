@@ -1,0 +1,82 @@
+name: catchpr
+description: >
+  Run catching tests against a pull request. Comments are not posted here.
+  This action reads no secrets. Do not pass API keys into a job that executes
+  untrusted pull request code. Use the workflow_run commenter to publish results.
+inputs:
+  base:
+    description: Base revision. For pull requests, the base SHA.
+    required: true
+  head:
+    description: Head revision. For pull requests, the head SHA.
+    required: true
+  repo:
+    description: Checkout to analyze. Defaults to the workspace.
+    required: false
+    default: "."
+  title:
+    description: Pull request title.
+    required: false
+    default: ""
+  body-file:
+    description: File containing the pull request body.
+    required: false
+    default: ""
+  results:
+    description: Where to write the JSON report.
+    required: false
+    default: catchpr-results.json
+  sarif:
+    description: Where to write SARIF. Empty skips SARIF.
+    required: false
+    default: catchpr.sarif
+  comment:
+    description: Where to write the comment markdown preview.
+    required: false
+    default: catchpr-comment.md
+  provider:
+    description: >
+      mock, groq, or openai. The secure default is mock. groq and openai read
+      API keys from the environment; do not set those in a pull_request job.
+    required: false
+    default: mock
+runs:
+  using: composite
+  steps:
+    - name: Install catchpr from this action
+      shell: bash
+      run: python -m pip install "${{ github.action_path }}"
+    - name: Run catchpr
+      shell: bash
+      env:
+        CATCHPR_TITLE: ${{ inputs.title }}
+        CATCHPR_BASE: ${{ inputs.base }}
+        CATCHPR_HEAD: ${{ inputs.head }}
+        CATCHPR_REPO: ${{ inputs.repo }}
+        CATCHPR_BODY_FILE: ${{ inputs.body-file }}
+        CATCHPR_RESULTS: ${{ inputs.results }}
+        CATCHPR_SARIF: ${{ inputs.sarif }}
+        CATCHPR_COMMENT: ${{ inputs.comment }}
+        CATCHPR_PROVIDER: ${{ inputs.provider }}
+      run: |
+        set -eu
+        args=(
+          run
+          --repo "$CATCHPR_REPO"
+          --base "$CATCHPR_BASE"
+          --head "$CATCHPR_HEAD"
+          --title "$CATCHPR_TITLE"
+          --provider "$CATCHPR_PROVIDER"
+          --json "$CATCHPR_RESULTS"
+          --report-only
+        )
+        if [ -n "$CATCHPR_BODY_FILE" ]; then
+          args+=(--body-file "$CATCHPR_BODY_FILE")
+        fi
+        if [ -n "$CATCHPR_SARIF" ]; then
+          args+=(--sarif "$CATCHPR_SARIF")
+        fi
+        if [ -n "$CATCHPR_COMMENT" ]; then
+          args+=(--comment "$CATCHPR_COMMENT")
+        fi
+        python -m catchpr "${args[@]}"

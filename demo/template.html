@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>catchpr replay</title>
+<style>
+  :root {
+    --paper: #f3efe4;
+    --ink: #1d1a16;
+    --muted: #5e574c;
+    --rule: #d9d0c0;
+    --add: #e5f2e6;
+    --add-ink: #1d5c32;
+    --del: #f8e4dc;
+    --del-ink: #8d2d16;
+    --stamp: #9d2c14;
+    --pass: #1d5c32;
+    --panel: #fffdf8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Palatino, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    min-height: 100vh;
+  }
+  header {
+    padding: 28px 32px 8px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .mark {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 12px;
+    margin: 0 0 8px;
+  }
+  h1 {
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.25;
+    margin: 0;
+    max-width: 22em;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 32px 48px;
+  }
+  nav { display: flex; flex-direction: column; gap: 6px; }
+  nav button {
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  nav button small {
+    display: block;
+    color: var(--muted);
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  nav button[aria-current="true"] { border-left-color: var(--stamp); background: #fffaf3; }
+  main { min-width: 0; }
+  .steps { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0 0 14px; flex-wrap: wrap; }
+  .steps button {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 6px 10px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .steps button[aria-current="true"] { color: var(--ink); border-color: var(--ink); background: var(--panel); }
+  #stage {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    min-height: 360px;
+    padding: 16px 18px 20px;
+    overflow: auto;
+  }
+  .file {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  pre, .diff {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.45;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .diff div { padding: 0 6px; }
+  .diff .add { background: var(--add); color: var(--add-ink); }
+  .diff .del { background: var(--del); color: var(--del-ink); }
+  .diff .hunk { color: var(--muted); }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pane { border: 1px solid var(--rule); padding: 10px; min-height: 180px; }
+  .pane h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+  .pane.pass h3 { color: var(--pass); }
+  .pane.fail h3 { color: var(--stamp); }
+  .verdict { padding: 8px 0 0; }
+  .stamp {
+    display: inline-block;
+    border: 2px solid var(--stamp);
+    color: var(--stamp);
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    transform: rotate(-2deg);
+    margin-bottom: 12px;
+  }
+  .stamp.quiet { border-color: var(--muted); color: var(--muted); }
+  .controls { display: flex; justify-content: space-between; margin-top: 12px; }
+  .controls button, .note {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  .controls button {
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .controls button:disabled { opacity: 0.35; cursor: default; }
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px 32px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; padding: 12px 16px 32px; }
+    header { padding: 20px 16px 0; }
+    h1 { font-size: 22px; }
+    nav { flex-direction: row; overflow-x: auto; }
+    nav button { min-width: 180px; border-left: 0; border-bottom: 3px solid transparent; }
+    nav button[aria-current="true"] { border-bottom-color: var(--stamp); }
+    .split { grid-template-columns: 1fr; }
+    footer { padding: 0 16px 24px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <p class="mark">catchpr replay</p>
+  <h1>The diff, the test, the two outputs, then a verdict. Nothing here runs on a server.</h1>
+</header>
+<div class="layout">
+  <nav id="cases" aria-label="Cases"></nav>
+  <main>
+    <ol class="steps" id="steps"></ol>
+    <section id="stage" aria-live="polite"></section>
+    <div class="controls">
+      <button id="prev" type="button">Back</button>
+      <button id="next" type="button">Next</button>
+    </div>
+  </main>
+</div>
+<footer>
+  Recorded by the catchbench mock run. The page only replays those transcripts.
+  A catch is a test that passed on the base commit and failed on the pull request.
+  If the transcript does not prove that, catchpr stays silent.
+</footer>
+<script>
+const CASES = __CASES_JSON__;
+const STEPS = ["Diff", "Generated test", "Base vs head", "Verdict"];
+
+const params = new URLSearchParams(location.search);
+let caseId = params.get("case") || CASES[0].id;
+let step = Number(params.get("step") || "0");
+if (!CASES.some((item) => item.id === caseId)) caseId = CASES[0].id;
+if (!Number.isInteger(step) || step < 0 || step >= STEPS.length) step = 0;
+
+const casesEl = document.getElementById("cases");
+const stepsEl = document.getElementById("steps");
+const stage = document.getElementById("stage");
+const prev = document.getElementById("prev");
+const next = document.getElementById("next");
+
+function current() {
+  return CASES.find((item) => item.id === caseId);
+}
+
+function renderNav() {
+  casesEl.replaceChildren();
+  for (const item of CASES) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = item.title;
+    const small = document.createElement("small");
+    small.textContent = item.id + " · " + item.outcome;
+    button.appendChild(small);
+    if (item.id === caseId) button.setAttribute("aria-current", "true");
+    button.addEventListener("click", () => {
+      caseId = item.id;
+      step = 0;
+      draw();
+    });
+    casesEl.appendChild(button);
+  }
+}
+
+function renderSteps() {
+  stepsEl.replaceChildren();
+  STEPS.forEach((label, index) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = (index + 1) + " " + label;
+    if (index === step) button.setAttribute("aria-current", "true");
+    button.addEventListener("click", () => {
+      step = index;
+      draw();
+    });
+    item.appendChild(button);
+    stepsEl.appendChild(item);
+  });
+}
+
+function addPre(parent, text) {
+  const pre = document.createElement("pre");
+  pre.textContent = text || "(no output recorded)";
+  parent.appendChild(pre);
+}
+
+function renderDiff(text) {
+  const wrap = document.createElement("div");
+  wrap.className = "diff";
+  for (const line of (text || "").split("\n")) {
+    const row = document.createElement("div");
+    row.textContent = line.length ? line : " ";
+    if (line.startsWith("+") && !line.startsWith("+++")) row.className = "add";
+    else if (line.startsWith("-") && !line.startsWith("---")) row.className = "del";
+    else if (line.startsWith("@@")) row.className = "hunk";
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+function draw() {
+  const item = current();
+  renderNav();
+  renderSteps();
+  stage.replaceChildren();
+  const file = document.createElement("p");
+  file.className = "file";
+  file.textContent = item.filename + "  ·  " + item.kind;
+  stage.appendChild(file);
+  if (step === 0) {
+    stage.appendChild(renderDiff(item.diff));
+  } else if (step === 1) {
+    addPre(stage, item.test);
+  } else if (step === 2) {
+    const split = document.createElement("div");
+    split.className = "split";
+    for (const [label, text, kind] of [
+      ["Base", item.base_output, item.base_passed ? "pass" : "fail"],
+      ["Head", item.head_output, item.head_passed ? "pass" : "fail"],
+    ]) {
+      const pane = document.createElement("div");
+      pane.className = "pane " + kind;
+      const title = document.createElement("h3");
+      title.textContent = label + (kind === "pass" ? " passed" : " failed");
+      pane.appendChild(title);
+      addPre(pane, text);
+      split.appendChild(pane);
+    }
+    stage.appendChild(split);
+  } else {
+    const box = document.createElement("div");
+    box.className = "verdict";
+    const stamp = document.createElement("div");
+    stamp.className = "stamp" + (item.outcome === "catch" ? "" : " quiet");
+    stamp.textContent = item.outcome === "catch" ? "Comment" : "Silent";
+    box.appendChild(stamp);
+    const prose = document.createElement("p");
+    prose.textContent = item.verdict;
+    box.appendChild(prose);
+    const reasons = (item.reasons || []).filter((reason) => !reason.startsWith("duplicate:"));
+    if (reasons.length) {
+      const list = document.createElement("pre");
+      list.textContent = reasons.join("\n");
+      box.appendChild(list);
+    }
+    stage.appendChild(box);
+  }
+  prev.disabled = step === 0;
+  next.disabled = step === STEPS.length - 1;
+  const url = new URL(location.href);
+  url.searchParams.set("case", caseId);
+  url.searchParams.set("step", String(step));
+  history.replaceState(null, "", url);
+}
+
+prev.addEventListener("click", () => { if (step > 0) { step -= 1; draw(); } });
+next.addEventListener("click", () => { if (step < STEPS.length - 1) { step += 1; draw(); } });
+document.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowRight") next.click();
+  if (event.key === "ArrowLeft") prev.click();
+});
+draw();
+</script>
+</body>
+</html>
