@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The live replay playground now leads with the product: a comment only when a test proves the bug. The page links to the GitHub source and install steps, recaps the base-versus-head proof on the verdict step, and serves a real `robots.txt`, a favicon, and Open Graph tags. The footer still labels the transcripts as a recorded catchbench mock run. Nothing on the Worker executes tests.
+- Tests cover GitHub API failure paths: HTTP errors, malformed payloads, comment pagination, zip-slip in artifact extracts, and network failures. `pytest` collects from the project root without requiring `python -m`.
+
 ## 0.1.0 - 2026-11-20
 
 First public version of catchpr. Python projects, pytest only.

@@ -46,8 +46,11 @@ def test_workflows_are_pinned_and_do_not_use_pull_request_target() -> None:
     assert "d1_databases" not in wrangler
     worker = (ROOT / "demo" / "src" / "worker.js").read_text(encoding="utf-8")
     assert "export default" in worker
-    assert "http://" not in worker
-    assert "https://" not in worker
+    # The page may link to GitHub and use the SVG namespace. The Worker itself
+    # must not issue HTTP requests.
+    assert ".fetch(" not in worker
+    assert "XMLHttpRequest" not in worker
+    assert "WebSocket" not in worker
 
 
 def test_published_mock_benchmark_matches_the_readme() -> None:

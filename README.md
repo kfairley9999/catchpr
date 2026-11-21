@@ -4,6 +4,8 @@
 
 **Live replay playground:** https://catchpr.kfairley9999.workers.dev
 
+![catchpr replay playground](docs/media/playground.png)
+
 catchpr comments on a pull request only when it has a generated test that passes on the base commit and fails on the head, every time it is run, and a one-line command that reproduces that result. If it cannot prove a behavior change, it stays silent.
 
 That is the opposite of a review bot that reads the diff and writes remarks. Those tools are regularly criticized for noise. [Greptile's public benchmark](https://www.greptile.com/benchmarks) is a useful picture of that style of evaluation: it scores whether a reviewer names a known bug. It does not score false positives. catchpr is built around the false-positive problem. A comment is a failing test, not a suspicion.

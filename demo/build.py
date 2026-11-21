@@ -125,19 +125,60 @@ def main() -> None:
     worker = (
         "const HTML = "
         + json.dumps(html)
+        + ";\nconst ROBOTS = "
+        + json.dumps("User-agent: *\nAllow: /\n")
+        + ";\nconst FAVICON = "
+        + json.dumps(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+            '<rect width="32" height="32" fill="#f3efe4"/>'
+            '<rect x="1.5" y="1.5" width="29" height="29" fill="none" stroke="#9d2c14" stroke-width="1.5"/>'
+            '<text x="16" y="23" text-anchor="middle" '
+            'font-family="Georgia, Palatino, serif" font-size="18" fill="#1d1a16">C</text>'
+            "</svg>"
+        )
         + """;
 
+const SECURITY = {
+  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'",
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "no-referrer",
+  "x-frame-options": "DENY",
+};
+
+function send(request, body, init) {
+  const headers = { ...SECURITY, ...(init.headers || {}) };
+  const payload = request.method === "HEAD" ? null : body;
+  return new Response(payload, { ...init, headers });
+}
+
 export default {
-  async fetch() {
-    return new Response(HTML, {
-      headers: {
-        "content-type": "text/html; charset=utf-8",
-        "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'",
-        "x-content-type-options": "nosniff",
-        "referrer-policy": "no-referrer",
-        "x-frame-options": "DENY",
-        "cache-control": "public, max-age=300",
-      },
+  async fetch(request) {
+    const method = request.method;
+    if (method !== "GET" && method !== "HEAD") {
+      return send(request, "Method not allowed", {
+        status: 405,
+        headers: { "content-type": "text/plain; charset=utf-8", allow: "GET, HEAD" },
+      });
+    }
+    const path = new URL(request.url).pathname;
+    if (path === "/robots.txt") {
+      return send(request, ROBOTS, {
+        headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=86400" },
+      });
+    }
+    if (path === "/favicon.svg" || path === "/favicon.ico") {
+      return send(request, FAVICON, {
+        headers: { "content-type": "image/svg+xml", "cache-control": "public, max-age=86400" },
+      });
+    }
+    if (path === "/" || path === "") {
+      return send(request, HTML, {
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" },
+      });
+    }
+    return send(request, "Not found", {
+      status: 404,
+      headers: { "content-type": "text/plain; charset=utf-8" },
     });
   },
 };

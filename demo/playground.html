@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>catchpr replay</title>
+<title>catchpr — a comment only when a test proves the bug</title>
+<meta name="description" content="catchpr comments on a pull request only when a generated test passes on the base commit and fails on the head. Otherwise it stays silent.">
+<meta property="og:title" content="catchpr — a comment only when a test proves the bug">
+<meta property="og:description" content="A pull request bot that stays silent unless it can prove a behavior change with a test. This page replays recorded transcripts. Nothing here runs on a server.">
+<meta property="og:url" content="https://catchpr.kfairley9999.workers.dev">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://catchpr.kfairley9999.workers.dev">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
   :root {
     --paper: #f3efe4;
@@ -44,6 +52,32 @@
     line-height: 1.25;
     margin: 0;
     max-width: 22em;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.45;
+    max-width: 36em;
+    margin: 10px 0 0;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 14px 0 0;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  .cta a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1px;
+  }
+  .cta a:hover { border-bottom-color: var(--ink); }
+  button:focus-visible, a:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
   }
   .layout {
     display: grid;
@@ -111,6 +145,7 @@
   .diff .hunk { color: var(--muted); }
   .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .pane { border: 1px solid var(--rule); padding: 10px; min-height: 180px; }
+  .pane.hug { min-height: 0; max-height: 180px; overflow: auto; }
   .pane h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
   .pane.pass h3 { color: var(--pass); }
   .pane.fail h3 { color: var(--stamp); }
@@ -127,6 +162,14 @@
     margin-bottom: 12px;
   }
   .stamp.quiet { border-color: var(--muted); color: var(--muted); }
+  .proof-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 16px 0 8px;
+  }
   .controls { display: flex; justify-content: space-between; margin-top: 12px; }
   .controls button, .note {
     font-family: ui-monospace, Menlo, Consolas, monospace;
@@ -161,8 +204,13 @@
 </head>
 <body>
 <header>
-  <p class="mark">catchpr replay</p>
-  <h1>The diff, the test, the two outputs, then a verdict. Nothing here runs on a server.</h1>
+  <p class="mark">catchpr</p>
+  <h1>A comment on a pull request only when a test proves the bug.</h1>
+  <p class="lede">If a generated test passes on the base commit and fails on the head, catchpr leaves one comment. Otherwise it stays silent. This page replays recorded transcripts. Nothing here runs on a server.</p>
+  <p class="cta">
+    <a href="https://github.com/kfairy9999/catchpr">Source on GitHub</a>
+    <a href="https://github.com/kfairy9999/catchpr#quickstart">Install from GitHub</a>
+  </p>
 </header>
 <div class="layout">
   <nav id="cases" aria-label="Cases"></nav>
@@ -280,7 +328,7 @@ const CASES = [
     "diff": "--- a/billing.py\n+++ b/billing.py\n@@ -1,5 +1,5 @@\n-def _format_total(cents: int) -> str:\n+def _render_total(cents: int) -> str:\n     return f'{cents / 100:.2f}'\n \n def format_invoice(cents: int) -> str:\n-    return _format_total(cents)\n+    return _render_total(cents)\n",
     "test": "from billing import _format_total\n\ndef test_private_total():\n    assert _format_total(250) == '2.50'\n",
     "base_output": ".                                                                        [100%]\n1 passed in 0.00s",
-    "head_output": "==================================== ERRORS ====================================\n____________ ERROR collecting _catchpr_probe/test_catchpr_probe.py _____________\nImportError while importing test module '/tmp/catchpr-74182lzr/head/_catchpr_probe/test_catchpr_probe.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/usr/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_catchpr_probe/test_catchpr_probe.py:1: in <module>\n    from billing import _format_total\nE   ImportError: cannot import name '_format_total' from 'billing' (/tmp/catchpr-74182lzr/head/billing.py)\n=========================== short test summary info ============================\nERROR _catchpr_probe/test_catchpr_probe.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.06s",
+    "head_output": "==================================== ERRORS ====================================\n____________ ERROR collecting _catchpr_probe/test_catchpr_probe.py _____________\nImportError while importing test module '/tmp/catchpr-kqaipruz/head/_catchpr_probe/test_catchpr_probe.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/usr/lib/python3.13/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_catchpr_probe/test_catchpr_probe.py:1: in <module>\n    from billing import _format_total\nE   ImportError: cannot import name '_format_total' from 'billing' (/tmp/catchpr-kqaipruz/head/billing.py)\n=========================== short test summary info ============================\nERROR _catchpr_probe/test_catchpr_probe.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.06s",
     "base_passed": true,
     "head_passed": false,
     "reasons": [
@@ -364,6 +412,24 @@ function renderDiff(text) {
   return wrap;
 }
 
+function renderProof(item, compact) {
+  const split = document.createElement("div");
+  split.className = "split";
+  for (const [label, text, kind] of [
+    ["Base", item.base_output, item.base_passed ? "pass" : "fail"],
+    ["Head", item.head_output, item.head_passed ? "pass" : "fail"],
+  ]) {
+    const pane = document.createElement("div");
+    pane.className = "pane " + kind + (compact ? " hug" : "");
+    const title = document.createElement("h3");
+    title.textContent = label + (kind === "pass" ? " passed" : " failed");
+    pane.appendChild(title);
+    addPre(pane, text);
+    split.appendChild(pane);
+  }
+  return split;
+}
+
 function draw() {
   const item = current();
   renderNav();
@@ -378,21 +444,7 @@ function draw() {
   } else if (step === 1) {
     addPre(stage, item.test);
   } else if (step === 2) {
-    const split = document.createElement("div");
-    split.className = "split";
-    for (const [label, text, kind] of [
-      ["Base", item.base_output, item.base_passed ? "pass" : "fail"],
-      ["Head", item.head_output, item.head_passed ? "pass" : "fail"],
-    ]) {
-      const pane = document.createElement("div");
-      pane.className = "pane " + kind;
-      const title = document.createElement("h3");
-      title.textContent = label + (kind === "pass" ? " passed" : " failed");
-      pane.appendChild(title);
-      addPre(pane, text);
-      split.appendChild(pane);
-    }
-    stage.appendChild(split);
+    stage.appendChild(renderProof(item, false));
   } else {
     const box = document.createElement("div");
     box.className = "verdict";
@@ -403,6 +455,11 @@ function draw() {
     const prose = document.createElement("p");
     prose.textContent = item.verdict;
     box.appendChild(prose);
+    const proofLabel = document.createElement("p");
+    proofLabel.className = "proof-label";
+    proofLabel.textContent = "The proof";
+    box.appendChild(proofLabel);
+    box.appendChild(renderProof(item, true));
     const reasons = (item.reasons || []).filter((reason) => !reason.startsWith("duplicate:"));
     if (reasons.length) {
       const list = document.createElement("pre");
