@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `catchpr.orchestra`: an optional orchestration and reliability layer for
+  typed agent pipelines. It adds a DAG with validated handoffs, retries with
+  backoff, timeouts, token, dollar, and time budgets, confidence escalation up a
+  DeepInfra tier ladder (the Claude rung ships disabled), a human review queue,
+  Ed25519-signed approvals for side effects, a hash-chained audit log with
+  verify and replay, HTML traces, and the `catchpr-orch` CLI. Wiring for the
+  `coi_agents` and `leadflow_sales` teams is in `catchpr.orchestra.integrations`.
+  Install with the `orchestra` extra. See `docs/orchestra/README.md`.
+
 - The live replay playground now leads with the product: a comment only when a test proves the bug. The page links to the GitHub source and install steps, recaps the base-versus-head proof on the verdict step, and serves a real `robots.txt`, a favicon, and Open Graph tags. The footer still labels the transcripts as a recorded catchbench mock run. Nothing on the Worker executes tests.
 - Tests cover GitHub API failure paths: HTTP errors, malformed payloads, comment pagination, zip-slip in artifact extracts, and network failures. `pytest` collects from the project root without requiring `python -m`.
 

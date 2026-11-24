@@ -152,6 +152,17 @@ npx wrangler deploy --dry-run
 
 `wrangler deploy --dry-run` bundles the Worker and exits without deploying. The dry run reports no bindings.
 
+## Orchestration layer (`catchpr.orchestra`)
+
+The repository also ships `catchpr.orchestra`, an optional reliability layer
+for typed multi-agent pipelines. It provides schema-checked handoffs, retries
+with backoff, timeouts, token, dollar, and time budgets, confidence-based
+escalation up a DeepInfra model ladder to a human review queue, side effects
+gated by signed human approvals, and a hash-chained audit log with offline
+replay. The PR tool above does not use it. Install it with
+`pip install -e ".[orchestra]"`, try `catchpr-orch demo coi`, and read
+[docs/orchestra/README.md](docs/orchestra/README.md).
+
 ## Limitations
 
 - Python only, and pytest only. The runner puts the worktree on `PYTHONPATH` and executes one generated file. It does not install the project's dependencies.

@@ -28,10 +28,18 @@ classifiers = [
 dependencies = ["pytest>=7.4,<9"]
 
 [project.optional-dependencies]
-dev = ["pytest-cov>=5", "ruff>=0.6", "mypy>=1.11"]
+orchestra = ["pydantic>=2.7,<3", "cryptography>=42"]
+dev = [
+  "pytest-cov>=5",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "pydantic>=2.7,<3",
+  "cryptography>=42",
+]
 
 [project.scripts]
 catchpr = "catchpr.cli:main"
+catchpr-orch = "catchpr.orchestra.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -47,7 +55,8 @@ addopts = "-q --tb=short"
 [tool.coverage.run]
 branch = true
 source = ["catchpr"]
-omit = ["*/__main__.py"]
+# Integrations need the separate agent-team packages; their tests skip without them.
+omit = ["*/__main__.py", "*/orchestra/integrations/*"]
 
 [tool.coverage.report]
 fail_under = 90
@@ -69,6 +78,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 "tests/**" = ["E501"]
 "catchbench/**" = ["E501"]
 "demo/**" = ["E501"]
+"src/catchpr/orchestra/trace.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -76,3 +86,8 @@ strict = true
 mypy_path = "src"
 packages = ["catchpr"]
 warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+# Agent-team packages are optional and imported lazily by the integrations.
+module = ["coi_agents.*", "leadflow_sales.*"]
+ignore_missing_imports = true

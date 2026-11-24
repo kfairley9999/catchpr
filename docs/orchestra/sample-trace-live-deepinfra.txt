@@ -1,0 +1,45 @@
+run 20261124T050522Z-3a3033  pipeline coi-backoffice-strict  status AWAITING_APPROVAL
+spent $0.00015778 of $0.02  tokens 1237/20000  elapsed 18.097s  audit verified (32 events)
+
+step         status             tiers                  try  tokens     cost $  conf
+-----------------------------------------------------------------------------------
+intake       succeeded          fast                     1       0   0.000000      
+extractor    succeeded          fast>standard>strong     4    1237   0.000158  0.95
+checker      succeeded          fast                     1       0   0.000000  1.00
+reviewer     awaiting_approval  fast                     1       0   0.000000      
+
+timeline:
+    0 05:05:22.412 run_start                     pipeline=coi-backoffice-strict simulated=False
+    1 05:05:22.413 step_start        intake      input=6a1426b276b5
+    2 05:05:22.413 attempt_start     intake      #1 tier=fast model=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+    3 05:05:22.414 attempt_ok        intake      #1 output=47a4f60f359f conf=None
+    4 05:05:22.414 step_end          intake      succeeded
+    5 05:05:22.414 step_start        extractor   input=47a4f60f359f
+    6 05:05:22.414 attempt_start     extractor   #1 tier=fast model=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+    7 05:05:25.492 llm_call          extractor   tier=fast 215+97 tok $0.00000818 3077.0ms
+    8 05:05:25.492 attempt_error     extractor   #1 OutputValidationError: model output did not match ExtractedFields: 1 validation error for ExtractedFiel retry in 0.512s
+    9 05:05:26.004 attempt_start     extractor   #2 tier=fast model=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+   10 05:05:29.835 llm_call          extractor   tier=fast 215+97 tok $0.00000818 3829.4ms
+   11 05:05:29.836 attempt_ok        extractor   #2 output=1f29d53203b8 conf=0.9
+   12 05:05:29.836 low_confidence    extractor   0.9 < 0.95 on fast
+   13 05:05:29.836 escalate          extractor   fast -> standard
+   14 05:05:29.836 attempt_start     extractor   #3 tier=standard model=meta-llama/Llama-3.3-70B-Instruct-Turbo
+   15 05:05:37.025 llm_call          extractor   tier=standard 215+88 tok $0.00004966 7188.1ms
+   16 05:05:37.026 attempt_ok        extractor   #3 output=fec036dfb5c1 conf=0.9
+   17 05:05:37.026 low_confidence    extractor   0.9 < 0.95 on standard
+   18 05:05:37.026 escalate          extractor   standard -> strong
+   19 05:05:37.026 attempt_start     extractor   #4 tier=strong model=deepseek-ai/DeepSeek-V3.2
+   20 05:05:40.506 llm_call          extractor   tier=strong 217+93 tok $0.00009176 3478.8ms
+   21 05:05:40.507 attempt_ok        extractor   #4 output=a1e7025b23c9 conf=0.95
+   22 05:05:40.507 step_end          extractor   succeeded
+   23 05:05:40.508 step_start        checker     input=a1e7025b23c9
+   24 05:05:40.508 attempt_start     checker     #1 tier=fast model=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+   25 05:05:40.508 attempt_ok        checker     #1 output=be03014f199d conf=1.0
+   26 05:05:40.508 step_end          checker     succeeded
+   27 05:05:40.508 step_start        reviewer    input=be03014f199d
+   28 05:05:40.509 attempt_start     reviewer    #1 tier=fast model=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+   29 05:05:40.509 approval_required reviewer    email.send -> certs@example-vendor.example item=ap-20261124T050522Z-3a3033-reviewer-179166e4
+   30 05:05:40.510 step_end          reviewer    awaiting_approval
+   31 05:05:40.510 run_end                       awaiting_approval spent=$0.00015778
+
+waiting on a human: ap-20261124T050522Z-3a3033-reviewer-179166e4
