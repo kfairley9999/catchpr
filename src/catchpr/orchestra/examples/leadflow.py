@@ -182,7 +182,7 @@ SAMPLE_INPUT: dict[str, Any] = {
     "region": "Los Angeles, CA",
     "vertical": "independent insurance agency",
     "count": 3,
-    "landing_page": "https://kfairy9999.github.io/coi-demo-site/",
+    "landing_page": "https://kfairley9999.github.io/coi-demo-site/",
     "send_ledger": [{"email": "owner@agency-c.example.com", "sent_count": 2}],
 }
 

@@ -1,6 +1,6 @@
 # catchpr
 
-[![ci](https://github.com/kfairy9999/catchpr/actions/workflows/ci.yml/badge.svg)](https://github.com/kfairy9999/catchpr/actions/workflows/ci.yml)
+[![ci](https://github.com/kfairley9999/catchpr/actions/workflows/ci.yml/badge.svg)](https://github.com/kfairley9999/catchpr/actions/workflows/ci.yml)
 
 **Live replay playground:** https://catchpr.kfairley9999.workers.dev
 
@@ -48,7 +48,7 @@ catchpr repro --repo . --base <base-sha> --head <head-sha> --test-b64 <test>
 Python 3.10 or newer. The package is not published to PyPI. Install it from GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/kfairy9999/catchpr.git"
+python -m pip install "git+https://github.com/kfairley9999/catchpr.git"
 ```
 
 Or from a local checkout (with dev tools and the benchmark harness):
